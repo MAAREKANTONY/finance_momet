@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Finance Momet{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">{{ title }}</h1>
+    
+    <form method="post" class="bg-white shadow rounded-lg p-6 space-y-6">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="bg-red-50 border border-red-200 rounded p-4">
+            {% for error in form.non_field_errors %}
+            <p class="text-red-800 text-sm">{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Informations générales -->
+        <div class="border-b pb-6">
+            <h3 class="text-lg font-semibold mb-4">Informations Générales</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<p class="text-red-600 text-sm mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    {{ form.description }}
+                </div>
+                
+                <div class="flex items-center">
+                    {{ form.is_default }}
+                    <label class="ml-2 text-sm text-gray-700">Scénario par défaut</label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Paramètres P -->
+        <div class="border-b pb-6">
+            <h3 class="text-lg font-semibold mb-4">Paramètres P (Prix Pondéré)</h3>
+            <p class="text-sm text-gray-600 mb-4">P = (a×Close + b×High + c×Low + d×Open) / (a+b+c+d)</p>
+            
+            <div class="grid grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">a (Close)</label>
+                    {{ form.a }}
+                    {% if form.a.errors %}<p class="text-red-600 text-sm mt-1">{{ form.a.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">b (High)</label>
+                    {{ form.b }}
+                    {% if form.b.errors %}<p class="text-red-600 text-sm mt-1">{{ form.b.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">c (Low)</label>
+                    {{ form.c }}
+                    {% if form.c.errors %}<p class="text-red-600 text-sm mt-1">{{ form.c.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">d (Open)</label>
+                    {{ form.d }}
+                    {% if form.d.errors %}<p class="text-red-600 text-sm mt-1">{{ form.d.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Canal -->
+        <div class="border-b pb-6">
+            <h3 class="text-lg font-semibold mb-4">Paramètre Canal</h3>
+            <p class="text-sm text-gray-600 mb-4">T = (M1 - X1) / e<br>⚠️ e ne peut pas être 0</p>
+            
+            <div class="w-1/4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">e *</label>
+                {{ form.e }}
+                {% if form.e.errors %}<p class="text-red-600 text-sm mt-1">{{ form.e.errors.0 }}</p>{% endif %}
+            </div>
+        </div>
+        
+        <!-- Périodes -->
+        <div>
+            <h3 class="text-lg font-semibold mb-4">Périodes</h3>
+            
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-medium text-gray-700 mb-2">Extrêmes</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">N1 (Max/Min de P)</label>
+                            {{ form.N1 }}
+                            {% if form.N1.errors %}<p class="text-red-600 text-sm mt-1">{{ form.N1.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">N2 (Lissage M1/X1)</label>
+                            {{ form.N2 }}
+                            {% if form.N2.errors %}<p class="text-red-600 text-sm mt-1">{{ form.N2.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-medium text-gray-700 mb-2">Tendance</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">N3 (Slope_P)</label>
+                            {{ form.N3 }}
+                            {% if form.N3.errors %}<p class="text-red-600 text-sm mt-1">{{ form.N3.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">N4 (Ratio_P)</label>
+                            {{ form.N4 }}
+                            {% if form.N4.errors %}<p class="text-red-600 text-sm mt-1">{{ form.N4.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex gap-4 pt-4">
+            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg">
+                💾 Enregistrer
+            </button>
+            <a href="{% url 'scenario_list' %}" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-4 rounded-lg text-center">
+                Annuler
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

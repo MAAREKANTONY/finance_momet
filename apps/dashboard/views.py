@@ -1,3 +1,4 @@
+from django.shortcuts import render, redirect, get_object_or_404
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -163,3 +164,148 @@ def logs_view(request):
     }
     
     return render(request, 'dashboard/logs.html', context)
+
+# ============================================
+# CRUD TICKERS
+# ============================================
+
+@login_required
+def symbol_list_view(request):
+    """Liste des tickers"""
+    symbols = Symbol.objects.all().order_by('-created_at')
+    
+    # Filtres
+    exchange = request.GET.get('exchange')
+    is_active = request.GET.get('is_active')
+    
+    if exchange:
+        symbols = symbols.filter(exchange=exchange)
+    if is_active:
+        symbols = symbols.filter(is_active=is_active == 'true')
+    
+    context = {
+        'symbols': symbols,
+        'exchanges': Symbol.objects.values_list('exchange', flat=True).distinct(),
+    }
+    
+    return render(request, 'dashboard/symbol_list.html', context)
+
+
+@login_required
+def symbol_create_view(request):
+    """Créer un ticker"""
+    from .forms import SymbolForm
+    
+    if request.method == 'POST':
+        form = SymbolForm(request.POST)
+        if form.is_valid():
+            symbol = form.save()
+            messages.success(request, f"✅ Ticker {symbol.code} créé avec succès")
+            return redirect('symbol_list')
+    else:
+        form = SymbolForm()
+    
+    return render(request, 'dashboard/symbol_form.html', {'form': form, 'title': 'Créer un Ticker'})
+
+
+@login_required
+def symbol_edit_view(request, symbol_id):
+    """Éditer un ticker"""
+    from .forms import SymbolForm
+    
+    symbol = get_object_or_404(Symbol, id=symbol_id)
+    
+    if request.method == 'POST':
+        form = SymbolForm(request.POST, instance=symbol)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"✅ Ticker {symbol.code} modifié avec succès")
+            return redirect('symbol_list')
+    else:
+        form = SymbolForm(instance=symbol)
+    
+    return render(request, 'dashboard/symbol_form.html', {'form': form, 'title': 'Éditer un Ticker', 'symbol': symbol})
+
+
+@login_required
+def symbol_delete_view(request, symbol_id):
+    """Supprimer un ticker"""
+    symbol = get_object_or_404(Symbol, id=symbol_id)
+    
+    if request.method == 'POST':
+        code = symbol.code
+        symbol.delete()
+        messages.success(request, f"✅ Ticker {code} supprimé avec succès")
+        return redirect('symbol_list')
+    
+    return render(request, 'dashboard/symbol_confirm_delete.html', {'symbol': symbol})
+
+
+# ============================================
+# CRUD SCÉNARIOS
+# ============================================
+
+@login_required
+def scenario_list_view(request):
+    """Liste des scénarios"""
+    scenarios = Scenario.objects.all().order_by('-is_default', 'name')
+    
+    context = {
+        'scenarios': scenarios,
+    }
+    
+    return render(request, 'dashboard/scenario_list.html', context)
+
+
+@login_required
+def scenario_create_view(request):
+    """Créer un scénario"""
+    from .forms import ScenarioForm
+    
+    if request.method == 'POST':
+        form = ScenarioForm(request.POST)
+        if form.is_valid():
+            scenario = form.save()
+            messages.success(request, f"✅ Scénario '{scenario.name}' créé avec succès")
+            return redirect('scenario_list')
+    else:
+        form = ScenarioForm(initial={
+            'a': 1, 'b': 1, 'c': 1, 'd': 1,
+            'e': 2,
+            'N1': 20, 'N2': 5, 'N3': 10, 'N4': 20
+        })
+    
+    return render(request, 'dashboard/scenario_form.html', {'form': form, 'title': 'Créer un Scénario'})
+
+
+@login_required
+def scenario_edit_view(request, scenario_id):
+    """Éditer un scénario"""
+    from .forms import ScenarioForm
+    
+    scenario = get_object_or_404(Scenario, id=scenario_id)
+    
+    if request.method == 'POST':
+        form = ScenarioForm(request.POST, instance=scenario)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"✅ Scénario '{scenario.name}' modifié avec succès")
+            return redirect('scenario_list')
+    else:
+        form = ScenarioForm(instance=scenario)
+    
+    return render(request, 'dashboard/scenario_form.html', {'form': form, 'title': 'Éditer un Scénario', 'scenario': scenario})
+
+
+@login_required
+def scenario_delete_view(request, scenario_id):
+    """Supprimer un scénario"""
+    scenario = get_object_or_404(Scenario, id=scenario_id)
+    
+    if request.method == 'POST':
+        name = scenario.name
+        scenario.delete()
+        messages.success(request, f"✅ Scénario '{name}' supprimé avec succès")
+        return redirect('scenario_list')
+    
+    return render(request, 'dashboard/scenario_confirm_delete.html', {'scenario': scenario})
