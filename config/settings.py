@@ -166,3 +166,6 @@ LOGGING = {
         },
     },
 }
+
+# Twelve Data API
+TWELVE_DATA_API_KEY = os.getenv('TWELVE_DATA_API_KEY', '')
