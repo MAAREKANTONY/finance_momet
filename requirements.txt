@@ -1,0 +1,17 @@
+Django==5.0.1
+psycopg2-binary==2.9.9
+redis==5.0.1
+celery==5.3.6
+django-celery-beat==2.5.0
+django-celery-results==2.5.1
+requests==2.31.0
+openpyxl==3.1.2
+pandas==2.1.4
+numpy==1.26.3
+python-dotenv==1.0.0
+gunicorn==21.2.0
+whitenoise==6.6.0
+django-solo==2.1.0
+ratelimit==2.2.1
+django-extensions==3.2.3
+pillow==10.1.0

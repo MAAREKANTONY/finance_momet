@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Archive Backtests - Finance Momet{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Archive des Backtests</h1>
+    
+    <!-- Filtres -->
+    <div class="bg-white shadow rounded-lg p-4 mb-6">
+        <form method="get" class="grid grid-cols-4 gap-4">
+            <select name="scenario" class="px-3 py-2 border rounded-md">
+                <option value="">Tous les scénarios</option>
+                {% for scenario in scenarios %}
+                <option value="{{ scenario.id }}">{{ scenario.name }}</option>
+                {% endfor %}
+            </select>
+            
+            <select name="strategy" class="px-3 py-2 border rounded-md">
+                <option value="">Toutes les stratégies</option>
+                {% for strategy in strategies %}
+                <option value="{{ strategy.id }}">{{ strategy.name }}</option>
+                {% endfor %}
+            </select>
+            
+            <select name="status" class="px-3 py-2 border rounded-md">
+                <option value="">Tous les statuts</option>
+                <option value="COMPLETED">Terminé</option>
+                <option value="RUNNING">En cours</option>
+                <option value="FAILED">Échoué</option>
+            </select>
+            
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                Filtrer
+            </button>
+        </form>
+    </div>
+    
+    <!-- Liste -->
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Scénario</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stratégie</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Statut</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">BT</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for run in runs %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap font-semibold">{{ run.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">{{ run.scenario.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">{{ run.strategy.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ run.created_at|date:"d/m/Y" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <span class="px-2 py-1 text-xs rounded-full
+                            {% if run.status == 'COMPLETED' %}bg-green-100 text-green-800
+                            {% elif run.status == 'RUNNING' %}bg-blue-100 text-blue-800
+                            {% elif run.status == 'FAILED' %}bg-red-100 text-red-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ run.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right {% if run.total_BT > 0 %}text-green-600{% elif run.total_BT < 0 %}text-red-600{% endif %}">
+                        {% if run.total_BT %}{{ run.total_BT|floatformat:2 }}{% else %}-{% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <a href="{% url 'backtest_detail' run.id %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                            Voir →
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                        Aucun backtest trouvé
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

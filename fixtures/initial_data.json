@@ -1,0 +1,28 @@
+[
+  {
+    "model": "core.scenario",
+    "pk": 1,
+    "fields": {
+      "name": "Scénario par défaut",
+      "description": "Scénario de test avec paramètres standards",
+      "is_default": true,
+      "a": "1.0000",
+      "b": "1.0000",
+      "c": "1.0000",
+      "d": "1.0000",
+      "e": "2.0000",
+      "N1": 20,
+      "N2": 5,
+      "N3": 10,
+      "N4": 20
+    }
+  },
+  {
+    "model": "backtesting.backteststrategy",
+    "pk": 1,
+    "fields": {
+      "name": "Stratégie A1-B1",
+      "description": "Achat sur A1, vente sur B1"
+    }
+  }
+]

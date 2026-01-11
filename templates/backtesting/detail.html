@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Backtest {{ run.name }} - Finance Momet{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="mb-6 flex justify-between items-start">
+        <div>
+            <h1 class="text-3xl font-bold">{{ run.name }}</h1>
+            <p class="text-gray-600 mt-2">{{ run.description }}</p>
+        </div>
+        <div>
+            <span class="px-4 py-2 rounded-full text-sm font-semibold
+                {% if run.status == 'COMPLETED' %}bg-green-100 text-green-800
+                {% elif run.status == 'RUNNING' %}bg-blue-100 text-blue-800
+                {% elif run.status == 'FAILED' %}bg-red-100 text-red-800
+                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                {{ run.get_status_display }}
+            </span>
+        </div>
+    </div>
+    
+    <!-- Métadonnées -->
+    <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <div class="grid grid-cols-4 gap-4 text-sm">
+            <div>
+                <span class="text-gray-500">Scénario:</span>
+                <p class="font-semibold">{{ run.scenario.name }}</p>
+            </div>
+            <div>
+                <span class="text-gray-500">Stratégie:</span>
+                <p class="font-semibold">{{ run.strategy.name }}</p>
+            </div>
+            <div>
+                <span class="text-gray-500">Période:</span>
+                <p class="font-semibold">{{ run.date_start|date:"d/m/Y" }} - {{ run.date_end|date:"d/m/Y" }}</p>
+            </div>
+            <div>
+                <span class="text-gray-500">Créé le:</span>
+                <p class="font-semibold">{{ run.created_at|date:"d/m/Y H:i" }}</p>
+            </div>
+        </div>
+    </div>
+    
+    {% if run.status == 'COMPLETED' %}
+    <!-- Résultats Globaux -->
+    <div class="grid grid-cols-4 gap-6 mb-8">
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-gray-500 text-sm">BT Total</h3>
+            <p class="text-3xl font-bold {% if run.total_BT > 0 %}text-green-600{% elif run.total_BT < 0 %}text-red-600{% endif %}">
+                {{ run.total_BT|floatformat:2 }}
+            </p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-gray-500 text-sm">BMJ Moyen</h3>
+            <p class="text-3xl font-bold">{{ run.total_BMJ|floatformat:2 }}</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-gray-500 text-sm">Nombre de Trades</h3>
+            <p class="text-3xl font-bold">{{ trades_count }}</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-gray-500 text-sm">Jours Ouvrés</h3>
+            <p class="text-3xl font-bold">{{ run.nb_jours_ouvres }}</p>
+        </div>
+    </div>
+    
+    <!-- Résultats par Ticker -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-2xl font-bold mb-4">Résultats par Ticker</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ticker</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">N (Coups)</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">BT</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">BMJ</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for stat in ticker_stats %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap font-mono font-semibold">{{ stat.symbol__code }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right">{{ stat.final_N }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right {% if stat.final_BT > 0 %}text-green-600{% elif stat.final_BT < 0 %}text-red-600{% endif %}">
+                            {{ stat.final_BT|floatformat:2 }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right">{{ stat.final_BMJ|floatformat:2 }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <a href="{% url 'backtest_ticker_detail' run.id stat.symbol__code %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                Détails →
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% elif run.status == 'FAILED' %}
+    <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+        <h3 class="text-red-900 font-semibold mb-2">❌ Le backtest a échoué</h3>
+        <p class="text-red-800 text-sm">{{ run.error_message }}</p>
+    </div>
+    {% elif run.status == 'RUNNING' %}
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p class="text-blue-900 font-semibold">Backtest en cours d'exécution...</p>
+        <p class="text-blue-700 text-sm mt-2">Cette page se rafraîchira automatiquement</p>
+    </div>
+    <script>
+        setTimeout(() => location.reload(), 5000);
+    </script>
+    {% endif %}
+</div>
+{% endblock %}
