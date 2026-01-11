@@ -1,108 +1,131 @@
 from django import forms
 from apps.core.models import Symbol, Scenario
-from apps.market_data.services import TwelveDataService
+from django.core.exceptions import ValidationError
 
 class SymbolForm(forms.ModelForm):
-    """Formulaire de création/édition de ticker"""
+    """Formulaire convivial pour créer/éditer un ticker"""
+    
     class Meta:
         model = Symbol
         fields = ['code', 'exchange', 'name', 'is_active']
         widgets = {
             'code': forms.TextInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md',
-                'placeholder': 'Ex: AAPL'
+                'class': 'w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg font-mono',
+                'placeholder': 'Ex: AAPL, MSFT, GOOGL...',
+                'id': 'ticker-code-input'
             }),
             'exchange': forms.TextInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md',
-                'placeholder': 'Ex: NASDAQ'
+                'class': 'w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none',
+                'placeholder': 'Ex: NASDAQ, NYSE',
+                'readonly': 'readonly'
             }),
             'name': forms.TextInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md',
-                'placeholder': 'Ex: Apple Inc.'
+                'class': 'w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none',
+                'placeholder': 'Nom de la société',
+                'readonly': 'readonly'
             }),
             'is_active': forms.CheckboxInput(attrs={
-                'class': 'w-4 h-4 text-blue-600'
+                'class': 'w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500'
             })
         }
-    
-    def clean(self):
-        cleaned_data = super().clean()
-        code = cleaned_data.get('code')
-        exchange = cleaned_data.get('exchange')
-        
-        if code and exchange:
-            # Valider via Twelve Data API
-            try:
-                service = TwelveDataService()
-                if not service.validate_symbol(code, exchange):
-                    raise forms.ValidationError(
-                        f"Le ticker {code} sur {exchange} n'existe pas dans Twelve Data"
-                    )
-            except Exception as e:
-                raise forms.ValidationError(f"Erreur de validation : {str(e)}")
-        
-        return cleaned_data
+        labels = {
+            'code': 'Code du Ticker',
+            'exchange': 'Bourse / Exchange',
+            'name': 'Nom de la Société',
+            'is_active': 'Actif'
+        }
+        help_texts = {
+            'code': '💡 Commencez à taper pour voir les suggestions automatiques',
+            'is_active': 'Décochez pour désactiver temporairement ce ticker'
+        }
 
 
 class ScenarioForm(forms.ModelForm):
-    """Formulaire de création/édition de scénario"""
+    """Formulaire convivial pour créer/éditer un scénario"""
+    
     class Meta:
         model = Scenario
         fields = ['name', 'description', 'is_default', 'a', 'b', 'c', 'd', 'e', 
                   'N1', 'N2', 'N3', 'N4']
         widgets = {
             'name': forms.TextInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md',
-                'placeholder': 'Ex: Scénario Aggressive'
+                'class': 'w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none',
+                'placeholder': 'Ex: Stratégie Conservative'
             }),
             'description': forms.Textarea(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md',
-                'rows': 3
+                'class': 'w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none',
+                'rows': 3,
+                'placeholder': 'Décrivez votre scénario...'
             }),
             'is_default': forms.CheckboxInput(attrs={
-                'class': 'w-4 h-4 text-blue-600'
+                'class': 'w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500'
             }),
             'a': forms.NumberInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md',
-                'step': '0.0001'
+                'class': 'w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none',
+                'step': '0.0001',
+                'min': '0'
             }),
             'b': forms.NumberInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md',
-                'step': '0.0001'
+                'class': 'w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none',
+                'step': '0.0001',
+                'min': '0'
             }),
             'c': forms.NumberInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md',
-                'step': '0.0001'
+                'class': 'w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none',
+                'step': '0.0001',
+                'min': '0'
             }),
             'd': forms.NumberInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md',
-                'step': '0.0001'
+                'class': 'w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none',
+                'step': '0.0001',
+                'min': '0'
             }),
             'e': forms.NumberInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md',
+                'class': 'w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none',
                 'step': '0.0001',
                 'min': '0.0001'
             }),
             'N1': forms.NumberInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md',
+                'class': 'w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none',
                 'min': '1'
             }),
             'N2': forms.NumberInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md',
+                'class': 'w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none',
                 'min': '1'
             }),
             'N3': forms.NumberInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md',
+                'class': 'w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none',
                 'min': '1'
             }),
             'N4': forms.NumberInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md',
+                'class': 'w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none',
                 'min': '1'
             }),
+        }
+        labels = {
+            'name': 'Nom du Scénario',
+            'description': 'Description',
+            'is_default': 'Scénario par défaut',
+            'a': 'Poids Close (a)',
+            'b': 'Poids High (b)',
+            'c': 'Poids Low (c)',
+            'd': 'Poids Open (d)',
+            'e': 'Facteur Canal (e)',
+            'N1': 'Période Max/Min (N1)',
+            'N2': 'Période Lissage (N2)',
+            'N3': 'Période Pente (N3)',
+            'N4': 'Période Ratio (N4)',
+        }
+        help_texts = {
+            'e': '⚠️ Ne peut pas être 0',
+            'N1': 'Nombre de jours pour calculer Max et Min de P',
+            'N2': 'Nombre de jours pour lisser M1 et X1',
+            'N3': 'Nombre de jours pour calculer slope_P',
+            'N4': 'Nombre de jours pour calculer ratio_P',
         }
     
     def clean_e(self):
         e = self.cleaned_data.get('e')
         if e == 0:
-            raise forms.ValidationError("Le paramètre 'e' ne peut pas être 0")
+            raise ValidationError("Le paramètre 'e' ne peut pas être 0")
         return e

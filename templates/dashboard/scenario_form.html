@@ -3,130 +3,185 @@
 {% block title %}{{ title }} - Finance Momet{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-8">{{ title }}</h1>
+<div class="max-w-5xl mx-auto px-4">
+    <!-- Breadcrumb -->
+    <div class="mb-6">
+        <a href="{% url 'scenario_list' %}" class="text-blue-600 hover:text-blue-800 text-sm">← Retour aux scénarios</a>
+    </div>
     
-    <form method="post" class="bg-white shadow rounded-lg p-6 space-y-6">
+    <!-- En-tête -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-900">{{ title }}</h1>
+        <p class="text-gray-600 mt-2">Configurez les paramètres de calcul des indicateurs techniques</p>
+    </div>
+    
+    <!-- Formulaire -->
+    <form method="post" class="bg-white shadow-xl rounded-lg overflow-hidden">
         {% csrf_token %}
         
-        {% if form.non_field_errors %}
-        <div class="bg-red-50 border border-red-200 rounded p-4">
-            {% for error in form.non_field_errors %}
-            <p class="text-red-800 text-sm">{{ error }}</p>
-            {% endfor %}
-        </div>
-        {% endif %}
-        
         <!-- Informations générales -->
-        <div class="border-b pb-6">
-            <h3 class="text-lg font-semibold mb-4">Informations Générales</h3>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4">
+            <h2 class="text-xl font-bold text-white">📋 Informations Générales</h2>
+        </div>
+        <div class="p-8 space-y-6 border-b-4 border-blue-100">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        {{ form.name.label }} <span class="text-red-500">*</span>
+                    </label>
                     {{ form.name }}
-                    {% if form.name.errors %}<p class="text-red-600 text-sm mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+                    {% if form.name.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        {{ form.description.label }}
+                    </label>
                     {{ form.description }}
                 </div>
                 
-                <div class="flex items-center">
-                    {{ form.is_default }}
-                    <label class="ml-2 text-sm text-gray-700">Scénario par défaut</label>
+                <div class="flex items-start">
+                    <div class="flex items-center h-5">
+                        {{ form.is_default }}
+                    </div>
+                    <div class="ml-3">
+                        <label for="{{ form.is_default.id_for_label }}" class="font-medium text-gray-700 cursor-pointer">
+                            {{ form.is_default.label }}
+                        </label>
+                        <p class="text-sm text-gray-500">Ce scénario sera utilisé par défaut pour tous les nouveaux tickers</p>
+                    </div>
                 </div>
             </div>
         </div>
         
         <!-- Paramètres P -->
-        <div class="border-b pb-6">
-            <h3 class="text-lg font-semibold mb-4">Paramètres P (Prix Pondéré)</h3>
-            <p class="text-sm text-gray-600 mb-4">P = (a×Close + b×High + c×Low + d×Open) / (a+b+c+d)</p>
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4">
+            <h2 class="text-xl font-bold text-white">📊 Paramètres du Prix Pondéré (P)</h2>
+        </div>
+        <div class="p-8 space-y-6 bg-blue-50 border-b-4 border-blue-100">
+            <div class="bg-white rounded-lg p-4 mb-4">
+                <p class="text-sm text-gray-700">
+                    <strong>Formule :</strong> P = (a × Close + b × High + c × Low + d × Open) / (a + b + c + d)
+                </p>
+            </div>
             
-            <div class="grid grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">a (Close)</label>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">{{ form.a.label }}</label>
                     {{ form.a }}
-                    {% if form.a.errors %}<p class="text-red-600 text-sm mt-1">{{ form.a.errors.0 }}</p>{% endif %}
+                    {% if form.a.errors %}<p class="mt-1 text-sm text-red-600">{{ form.a.errors.0 }}</p>{% endif %}
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">b (High)</label>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">{{ form.b.label }}</label>
                     {{ form.b }}
-                    {% if form.b.errors %}<p class="text-red-600 text-sm mt-1">{{ form.b.errors.0 }}</p>{% endif %}
+                    {% if form.b.errors %}<p class="mt-1 text-sm text-red-600">{{ form.b.errors.0 }}</p>{% endif %}
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">c (Low)</label>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">{{ form.c.label }}</label>
                     {{ form.c }}
-                    {% if form.c.errors %}<p class="text-red-600 text-sm mt-1">{{ form.c.errors.0 }}</p>{% endif %}
+                    {% if form.c.errors %}<p class="mt-1 text-sm text-red-600">{{ form.c.errors.0 }}</p>{% endif %}
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">d (Open)</label>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">{{ form.d.label }}</label>
                     {{ form.d }}
-                    {% if form.d.errors %}<p class="text-red-600 text-sm mt-1">{{ form.d.errors.0 }}</p>{% endif %}
+                    {% if form.d.errors %}<p class="mt-1 text-sm text-red-600">{{ form.d.errors.0 }}</p>{% endif %}
                 </div>
             </div>
         </div>
         
-        <!-- Canal -->
-        <div class="border-b pb-6">
-            <h3 class="text-lg font-semibold mb-4">Paramètre Canal</h3>
-            <p class="text-sm text-gray-600 mb-4">T = (M1 - X1) / e<br>⚠️ e ne peut pas être 0</p>
+        <!-- Paramètre Canal -->
+        <div class="bg-gradient-to-r from-purple-600 to-purple-700 px-8 py-4">
+            <h2 class="text-xl font-bold text-white">📐 Paramètre Canal</h2>
+        </div>
+        <div class="p-8 bg-purple-50 border-b-4 border-purple-100">
+            <div class="bg-white rounded-lg p-4 mb-6">
+                <p class="text-sm text-gray-700">
+                    <strong>Formule :</strong> T = (M1 - X1) / e<br>
+                    <strong class="text-red-600">⚠️ Important :</strong> e ne peut pas être 0
+                </p>
+            </div>
             
-            <div class="w-1/4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">e *</label>
+            <div class="max-w-xs">
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                    {{ form.e.label }} <span class="text-red-500">*</span>
+                </label>
                 {{ form.e }}
-                {% if form.e.errors %}<p class="text-red-600 text-sm mt-1">{{ form.e.errors.0 }}</p>{% endif %}
+                {% if form.e.help_text %}
+                <p class="mt-2 text-sm text-gray-500">{{ form.e.help_text }}</p>
+                {% endif %}
+                {% if form.e.errors %}
+                <p class="mt-2 text-sm text-red-600">{{ form.e.errors.0 }}</p>
+                {% endif %}
             </div>
         </div>
         
         <!-- Périodes -->
-        <div>
-            <h3 class="text-lg font-semibold mb-4">Périodes</h3>
-            
-            <div class="grid grid-cols-2 gap-6">
-                <div>
-                    <h4 class="font-medium text-gray-700 mb-2">Extrêmes</h4>
+        <div class="bg-gradient-to-r from-green-600 to-green-700 px-8 py-4">
+            <h2 class="text-xl font-bold text-white">⏱️ Périodes de Calcul</h2>
+        </div>
+        <div class="p-8 bg-green-50">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-lg p-6 shadow-sm">
+                    <h3 class="font-bold text-green-900 mb-4 text-lg">Extrêmes</h3>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">N1 (Max/Min de P)</label>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">{{ form.N1.label }}</label>
                             {{ form.N1 }}
-                            {% if form.N1.errors %}<p class="text-red-600 text-sm mt-1">{{ form.N1.errors.0 }}</p>{% endif %}
+                            {% if form.N1.help_text %}
+                            <p class="mt-2 text-sm text-gray-500">{{ form.N1.help_text }}</p>
+                            {% endif %}
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">N2 (Lissage M1/X1)</label>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">{{ form.N2.label }}</label>
                             {{ form.N2 }}
-                            {% if form.N2.errors %}<p class="text-red-600 text-sm mt-1">{{ form.N2.errors.0 }}</p>{% endif %}
+                            {% if form.N2.help_text %}
+                            <p class="mt-2 text-sm text-gray-500">{{ form.N2.help_text }}</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
                 
-                <div>
-                    <h4 class="font-medium text-gray-700 mb-2">Tendance</h4>
+                <div class="bg-white rounded-lg p-6 shadow-sm">
+                    <h3 class="font-bold text-green-900 mb-4 text-lg">Tendance</h3>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">N3 (Slope_P)</label>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">{{ form.N3.label }}</label>
                             {{ form.N3 }}
-                            {% if form.N3.errors %}<p class="text-red-600 text-sm mt-1">{{ form.N3.errors.0 }}</p>{% endif %}
+                            {% if form.N3.help_text %}
+                            <p class="mt-2 text-sm text-gray-500">{{ form.N3.help_text }}</p>
+                            {% endif %}
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">N4 (Ratio_P)</label>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">{{ form.N4.label }}</label>
                             {{ form.N4 }}
-                            {% if form.N4.errors %}<p class="text-red-600 text-sm mt-1">{{ form.N4.errors.0 }}</p>{% endif %}
+                            {% if form.N4.help_text %}
+                            <p class="mt-2 text-sm text-gray-500">{{ form.N4.help_text }}</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="flex gap-4 pt-4">
-            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg">
-                💾 Enregistrer
-            </button>
-            <a href="{% url 'scenario_list' %}" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-4 rounded-lg text-center">
+        <!-- Erreurs -->
+        {% if form.non_field_errors %}
+        <div class="p-8 bg-red-50">
+            {% for error in form.non_field_errors %}
+            <p class="text-red-800 font-semibold">❌ {{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Actions -->
+        <div class="bg-gray-50 px-8 py-6 flex justify-between items-center">
+            <a href="{% url 'scenario_list' %}" class="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition">
                 Annuler
             </a>
+            <button type="submit" class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-lg transition duration-200">
+                {{ submit_text }}
+            </button>
         </div>
     </form>
 </div>

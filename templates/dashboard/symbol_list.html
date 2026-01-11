@@ -3,81 +3,144 @@
 {% block title %}Gestion des Tickers - Finance Momet{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 py-8">
+<div class="max-w-7xl mx-auto px-4">
+    <!-- En-tête -->
     <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold">Gestion des Tickers</h1>
-        <a href="{% url 'symbol_create' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
-            ➕ Ajouter un Ticker
+        <div>
+            <h1 class="text-4xl font-bold text-gray-900">📈 Mes Tickers</h1>
+            <p class="text-gray-600 mt-2">Gérez vos actions et ETF surveillés</p>
+        </div>
+        <a href="{% url 'symbol_create' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-200 flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Ajouter un Ticker
         </a>
     </div>
     
     <!-- Filtres -->
-    <div class="bg-white shadow rounded-lg p-4 mb-6">
-        <form method="get" class="grid grid-cols-3 gap-4">
-            <select name="exchange" class="px-3 py-2 border rounded-md">
-                <option value="">Tous les exchanges</option>
-                {% for exchange in exchanges %}
-                <option value="{{ exchange }}">{{ exchange }}</option>
-                {% endfor %}
-            </select>
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">🔍 Recherche</label>
+                <input type="text" name="search" value="{{ request.GET.search }}" 
+                       placeholder="Code ou nom..."
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
             
-            <select name="is_active" class="px-3 py-2 border rounded-md">
-                <option value="">Tous les statuts</option>
-                <option value="true">Actifs</option>
-                <option value="false">Inactifs</option>
-            </select>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">🏛️ Bourse</label>
+                <select name="exchange" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <option value="">Toutes</option>
+                    {% for exchange in exchanges %}
+                    <option value="{{ exchange }}" {% if request.GET.exchange == exchange %}selected{% endif %}>{{ exchange }}</option>
+                    {% endfor %}
+                </select>
+            </div>
             
-            <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">
-                Filtrer
-            </button>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">📊 Statut</label>
+                <select name="is_active" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <option value="">Tous</option>
+                    <option value="true" {% if request.GET.is_active == 'true' %}selected{% endif %}>Actifs</option>
+                    <option value="false" {% if request.GET.is_active == 'false' %}selected{% endif %}>Inactifs</option>
+                </select>
+            </div>
+            
+            <div class="flex items-end">
+                <button type="submit" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition">
+                    Filtrer
+                </button>
+            </div>
         </form>
     </div>
     
-    <!-- Liste -->
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Code</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Exchange</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Statut</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                {% for symbol in symbols %}
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap font-mono font-bold">{{ symbol.code }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">{{ symbol.exchange }}</td>
-                    <td class="px-6 py-4 text-sm">{{ symbol.name|default:"-" }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                        <span class="px-2 py-1 text-xs rounded-full {% if symbol.is_active %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
-                            {% if symbol.is_active %}Actif{% else %}Inactif{% endif %}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center space-x-2">
-                        <a href="{% url 'symbol_edit' symbol.id %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                            ✏️ Éditer
-                        </a>
-                        <a href="{% url 'symbol_delete' symbol.id %}" class="text-red-600 hover:text-red-800 text-sm font-medium">
-                            🗑️ Supprimer
-                        </a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
-                        Aucun ticker trouvé
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    
-    <div class="mt-4 text-sm text-gray-600">
-        Total : {{ symbols.count }} ticker(s)
+    <!-- Liste des tickers -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Code</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Nom</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Bourse</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Statut</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for symbol in page_obj %}
+                    <tr class="hover:bg-blue-50 transition duration-150">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-lg font-bold text-blue-600 font-mono">{{ symbol.code }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-sm text-gray-900">{{ symbol.name|default:"—" }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm text-gray-600">{{ symbol.exchange }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            {% if symbol.is_active %}
+                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                ✓ Actif
+                            </span>
+                            {% else %}
+                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                ✗ Inactif
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center space-x-2">
+                            <a href="{% url 'symbol_edit' symbol.id %}" 
+                               class="inline-flex items-center px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm font-medium rounded-lg transition">
+                                ✏️ Modifier
+                            </a>
+                            <a href="{% url 'symbol_delete' symbol.id %}" 
+                               class="inline-flex items-center px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-sm font-medium rounded-lg transition">
+                                🗑️ Supprimer
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center">
+                            <div class="text-gray-400 text-lg">
+                                <p class="mb-4">📭 Aucun ticker trouvé</p>
+                                <a href="{% url 'symbol_create' %}" class="text-blue-600 hover:text-blue-800 font-semibold">
+                                    Créer votre premier ticker →
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+            <div class="flex justify-between items-center">
+                <div class="text-sm text-gray-600">
+                    Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }} • Total : {{ total_count }} ticker(s)
+                </div>
+                <div class="flex space-x-2">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                        ← Précédent
+                    </a>
+                    {% endif %}
+                    
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                        Suivant →
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

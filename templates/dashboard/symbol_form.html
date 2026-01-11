@@ -3,63 +3,226 @@
 {% block title %}{{ title }} - Finance Momet{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-8">{{ title }}</h1>
-    
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <h3 class="font-semibold text-blue-900 mb-2">ℹ️ Validation Twelve Data</h3>
-        <p class="text-sm text-blue-800">
-            Le ticker sera validé via l'API Twelve Data avant d'être enregistré.
-            Si le ticker n'existe pas, une erreur sera affichée.
-        </p>
+<div class="max-w-3xl mx-auto px-4">
+    <!-- Breadcrumb -->
+    <div class="mb-6">
+        <a href="{% url 'symbol_list' %}" class="text-blue-600 hover:text-blue-800 text-sm">← Retour à la liste</a>
     </div>
     
-    <form method="post" class="bg-white shadow rounded-lg p-6 space-y-6">
+    <!-- En-tête -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-900">{{ title }}</h1>
+        <p class="text-gray-600 mt-2">Ajoutez un ticker pour commencer à le surveiller</p>
+    </div>
+    
+    <!-- Aide -->
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-6 mb-8 rounded-r-lg">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-lg font-semibold text-blue-900">💡 Astuce</h3>
+                <p class="text-blue-800 mt-2">
+                    Commencez à taper le code du ticker (au moins 2 caractères) et une liste de suggestions apparaîtra automatiquement.
+                    Les champs "Bourse" et "Nom" se rempliront automatiquement lorsque vous sélectionnerez un ticker.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Formulaire -->
+    <form method="post" class="bg-white shadow-xl rounded-lg overflow-hidden">
         {% csrf_token %}
         
-        {% if form.non_field_errors %}
-        <div class="bg-red-50 border border-red-200 rounded p-4">
-            {% for error in form.non_field_errors %}
-            <p class="text-red-800 text-sm">{{ error }}</p>
-            {% endfor %}
-        </div>
-        {% endif %}
-        
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Code du Ticker *</label>
-            {{ form.code }}
-            {% if form.code.errors %}
-            <p class="text-red-600 text-sm mt-1">{{ form.code.errors.0 }}</p>
+        <div class="p-8 space-y-6">
+            <!-- Code -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                    {{ form.code.label }}
+                    <span class="text-red-500">*</span>
+                </label>
+                {{ form.code }}
+                {% if form.code.help_text %}
+                <p class="mt-2 text-sm text-gray-500">{{ form.code.help_text }}</p>
+                {% endif %}
+                {% if form.code.errors %}
+                <p class="mt-2 text-sm text-red-600">{{ form.code.errors.0 }}</p>
+                {% endif %}
+                
+                <!-- Zone de suggestions (remplie par JavaScript) -->
+                <div id="ticker-suggestions" class="hidden mt-2"></div>
+            </div>
+            
+            <!-- Exchange -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                    {{ form.exchange.label }}
+                    <span class="text-red-500">*</span>
+                </label>
+                {{ form.exchange }}
+                {% if form.exchange.errors %}
+                <p class="mt-2 text-sm text-red-600">{{ form.exchange.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Name -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">
+                    {{ form.name.label }}
+                </label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Is Active -->
+            <div class="flex items-start">
+                <div class="flex items-center h-5">
+                    {{ form.is_active }}
+                </div>
+                <div class="ml-3">
+                    <label for="{{ form.is_active.id_for_label }}" class="font-medium text-gray-700 cursor-pointer">
+                        {{ form.is_active.label }}
+                    </label>
+                    {% if form.is_active.help_text %}
+                    <p class="text-sm text-gray-500">{{ form.is_active.help_text }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Erreurs non-field -->
+            {% if form.non_field_errors %}
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+                {% for error in form.non_field_errors %}
+                <p class="text-red-800">{{ error }}</p>
+                {% endfor %}
+            </div>
             {% endif %}
         </div>
         
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Exchange/Marché *</label>
-            {{ form.exchange }}
-            {% if form.exchange.errors %}
-            <p class="text-red-600 text-sm mt-1">{{ form.exchange.errors.0 }}</p>
-            {% endif %}
-            <p class="text-gray-500 text-xs mt-1">Ex: NASDAQ, NYSE, LSE</p>
-        </div>
-        
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Nom (optionnel)</label>
-            {{ form.name }}
-        </div>
-        
-        <div class="flex items-center">
-            {{ form.is_active }}
-            <label class="ml-2 text-sm text-gray-700">Actif</label>
-        </div>
-        
-        <div class="flex gap-4 pt-4">
-            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg">
-                💾 Enregistrer
-            </button>
-            <a href="{% url 'symbol_list' %}" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-4 rounded-lg text-center">
+        <!-- Actions -->
+        <div class="bg-gray-50 px-8 py-6 flex justify-between items-center border-t">
+            <a href="{% url 'symbol_list' %}" class="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition">
                 Annuler
             </a>
+            <button type="submit" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg transition duration-200">
+                {{ submit_text }}
+            </button>
         </div>
     </form>
 </div>
+
+<!-- JavaScript pour l'autocomplétion -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('ticker-code-input');
+    const suggestionsDiv = document.getElementById('ticker-suggestions');
+    const exchangeInput = document.querySelector('input[name="exchange"]');
+    const nameInput = document.querySelector('input[name="name"]');
+    
+    let debounceTimer;
+    
+    // Styles pour les suggestions
+    suggestionsDiv.className = 'absolute z-50 w-full bg-white border-2 border-blue-500 rounded-lg shadow-2xl mt-1 max-h-96 overflow-y-auto';
+    
+    input.addEventListener('input', function(e) {
+        clearTimeout(debounceTimer);
+        const query = e.target.value.trim();
+        
+        if (query.length >= 2) {
+            debounceTimer = setTimeout(() => searchTicker(query), 400);
+        } else {
+            hideSuggestions();
+        }
+    });
+    
+    async function searchTicker(query) {
+        try {
+            const response = await fetch(`{% url 'ticker_autocomplete_api' %}?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+            
+            if (data.results && data.results.length > 0) {
+                showSuggestions(data.results);
+            } else {
+                showNoResults();
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            showError();
+        }
+    }
+    
+    function showSuggestions(results) {
+        suggestionsDiv.innerHTML = results.map(item => `
+            <div class="suggestion-item px-6 py-4 hover:bg-blue-50 cursor-pointer border-b last:border-b-0 transition"
+                 data-symbol="${item.symbol}"
+                 data-exchange="${item.exchange}"
+                 data-name="${item.name}">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="font-bold text-lg text-blue-600">${item.symbol}</div>
+                        <div class="text-sm text-gray-700 mt-1">${item.name || 'N/A'}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs bg-gray-100 px-2 py-1 rounded font-semibold">${item.exchange || 'N/A'}</div>
+                        <div class="text-xs text-gray-500 mt-1">${item.country || ''}</div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        suggestionsDiv.classList.remove('hidden');
+        
+        // Événements de clic
+        document.querySelectorAll('.suggestion-item').forEach(item => {
+            item.addEventListener('click', function() {
+                input.value = this.dataset.symbol;
+                exchangeInput.value = this.dataset.exchange;
+                nameInput.value = this.dataset.name;
+                hideSuggestions();
+            });
+        });
+    }
+    
+    function showNoResults() {
+        suggestionsDiv.innerHTML = `
+            <div class="px-6 py-8 text-center text-gray-500">
+                <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <p class="font-semibold">Aucun ticker trouvé</p>
+                <p class="text-sm mt-1">Essayez un autre code</p>
+            </div>
+        `;
+        suggestionsDiv.classList.remove('hidden');
+    }
+    
+    function showError() {
+        suggestionsDiv.innerHTML = `
+            <div class="px-6 py-4 text-center text-red-600">
+                ⚠️ Erreur de connexion à l'API
+            </div>
+        `;
+        suggestionsDiv.classList.remove('hidden');
+    }
+    
+    function hideSuggestions() {
+        suggestionsDiv.classList.add('hidden');
+    }
+    
+    // Fermer au clic extérieur
+    document.addEventListener('click', function(e) {
+        if (e.target !== input && !suggestionsDiv.contains(e.target)) {
+            hideSuggestions();
+        }
+    });
+    
+    // Position relative pour le parent
+    input.parentElement.style.position = 'relative';
+});
+</script>
 {% endblock %}

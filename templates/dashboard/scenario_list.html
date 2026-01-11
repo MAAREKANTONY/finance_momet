@@ -3,59 +3,166 @@
 {% block title %}Gestion des Scénarios - Finance Momet{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 py-8">
+<div class="max-w-7xl mx-auto px-4">
+    <!-- En-tête -->
     <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold">Gestion des Scénarios</h1>
-        <a href="{% url 'scenario_create' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
-            ➕ Créer un Scénario
+        <div>
+            <h1 class="text-4xl font-bold text-gray-900">⚙️ Mes Scénarios</h1>
+            <p class="text-gray-600 mt-2">Gérez vos stratégies de calcul d'indicateurs</p>
+        </div>
+        <a href="{% url 'scenario_create' %}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-200 flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Créer un Scénario
         </a>
     </div>
     
-    <div class="grid gap-6">
+    <!-- Info Box -->
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-6 mb-8 rounded-r-lg">
+        <div class="flex items-start">
+            <svg class="h-6 w-6 text-blue-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div class="ml-3">
+                <h3 class="text-lg font-semibold text-blue-900">📊 Qu'est-ce qu'un scénario ?</h3>
+                <p class="text-blue-800 mt-2">
+                    Un scénario définit les paramètres de calcul des indicateurs techniques (P, M, X, K1-K4, ratio_P, amp_h). 
+                    Chaque scénario utilise des périodes (N1-N4) et des poids (a-e) différents pour s'adapter à votre style de trading.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Liste des scénarios -->
+    <div class="space-y-6">
         {% for scenario in scenarios %}
-        <div class="bg-white shadow rounded-lg p-6 {% if scenario.is_default %}border-2 border-blue-500{% endif %}">
-            <div class="flex justify-between items-start mb-4">
-                <div>
-                    <h2 class="text-xl font-bold">{{ scenario.name }}</h2>
-                    {% if scenario.is_default %}
-                    <span class="inline-block mt-1 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-                        Par défaut
-                    </span>
-                    {% endif %}
-                    <p class="text-gray-600 text-sm mt-2">{{ scenario.description|default:"Aucune description" }}</p>
-                </div>
-                <div class="flex gap-2">
-                    <a href="{% url 'scenario_edit' scenario.id %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                        ✏️ Éditer
-                    </a>
-                    <a href="{% url 'scenario_delete' scenario.id %}" class="text-red-600 hover:text-red-800 text-sm font-medium">
-                        🗑️ Supprimer
-                    </a>
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden {% if scenario.is_default %}ring-4 ring-green-400{% endif %}">
+            <!-- En-tête du scénario -->
+            <div class="bg-gradient-to-r {% if scenario.is_default %}from-green-500 to-green-600{% else %}from-gray-700 to-gray-800{% endif %} px-6 py-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white flex items-center">
+                            {{ scenario.name }}
+                            {% if scenario.is_default %}
+                            <span class="ml-3 px-3 py-1 bg-white text-green-600 text-sm font-bold rounded-full">
+                                ✓ PAR DÉFAUT
+                            </span>
+                            {% endif %}
+                        </h2>
+                        <p class="text-gray-200 mt-1">{{ scenario.description|default:"Aucune description" }}</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <a href="{% url 'scenario_edit' scenario.id %}" 
+                           class="px-4 py-2 bg-white hover:bg-gray-100 text-gray-800 font-semibold rounded-lg transition">
+                            ✏️ Modifier
+                        </a>
+                        <a href="{% url 'scenario_delete' scenario.id %}" 
+                           class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition">
+                            🗑️ Supprimer
+                        </a>
+                    </div>
                 </div>
             </div>
             
-            <div class="grid grid-cols-4 gap-4 text-sm">
-                <div>
-                    <span class="text-gray-500">Paramètres P:</span>
-                    <p class="font-mono">a={{ scenario.a }}, b={{ scenario.b }}, c={{ scenario.c }}, d={{ scenario.d }}</p>
+            <!-- Détails du scénario -->
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Paramètres P -->
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <h3 class="font-bold text-blue-900 mb-3 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                            </svg>
+                            Prix Pondéré (P)
+                        </h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Poids Close (a):</span>
+                                <span class="font-mono font-bold">{{ scenario.a }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Poids High (b):</span>
+                                <span class="font-mono font-bold">{{ scenario.b }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Poids Low (c):</span>
+                                <span class="font-mono font-bold">{{ scenario.c }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Poids Open (d):</span>
+                                <span class="font-mono font-bold">{{ scenario.d }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Canal -->
+                    <div class="bg-purple-50 rounded-lg p-4">
+                        <h3 class="font-bold text-purple-900 mb-3 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            Canal
+                        </h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Facteur (e):</span>
+                                <span class="font-mono font-bold text-purple-600">{{ scenario.e }}</span>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-2">
+                                T = (M1 - X1) / e
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Périodes -->
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <h3 class="font-bold text-green-900 mb-3 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Périodes
+                        </h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">N1 (Max/Min):</span>
+                                <span class="font-mono font-bold">{{ scenario.N1 }} jours</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">N2 (Lissage):</span>
+                                <span class="font-mono font-bold">{{ scenario.N2 }} jours</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">N3 (Pente):</span>
+                                <span class="font-mono font-bold">{{ scenario.N3 }} jours</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">N4 (Ratio):</span>
+                                <span class="font-mono font-bold">{{ scenario.N4 }} jours</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <span class="text-gray-500">Canal:</span>
-                    <p class="font-mono">e={{ scenario.e }}</p>
-                </div>
-                <div>
-                    <span class="text-gray-500">Extrêmes:</span>
-                    <p class="font-mono">N1={{ scenario.N1 }}, N2={{ scenario.N2 }}</p>
-                </div>
-                <div>
-                    <span class="text-gray-500">Tendance:</span>
-                    <p class="font-mono">N3={{ scenario.N3 }}, N4={{ scenario.N4 }}</p>
+                
+                <!-- Métadonnées -->
+                <div class="mt-4 pt-4 border-t border-gray-200 flex justify-between text-sm text-gray-500">
+                    <span>Créé le {{ scenario.created_at|date:"d/m/Y à H:i" }}</span>
+                    {% if scenario.updated_at != scenario.created_at %}
+                    <span>Modifié le {{ scenario.updated_at|date:"d/m/Y à H:i" }}</span>
+                    {% endif %}
                 </div>
             </div>
         </div>
         {% empty %}
-        <div class="bg-white shadow rounded-lg p-6 text-center text-gray-500">
-            Aucun scénario trouvé
+        <div class="bg-white rounded-lg shadow-md p-12 text-center">
+            <svg class="w-24 h-24 mx-auto mb-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+            </svg>
+            <h3 class="text-2xl font-bold text-gray-700 mb-2">Aucun scénario</h3>
+            <p class="text-gray-500 mb-6">Créez votre premier scénario pour commencer à calculer des indicateurs</p>
+            <a href="{% url 'scenario_create' %}" class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg">
+                Créer un Scénario →
+            </a>
         </div>
         {% endfor %}
     </div>
