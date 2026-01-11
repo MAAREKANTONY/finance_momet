@@ -5,55 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Finance Momet{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="bg-gray-50">
-    <nav class="bg-white shadow-lg border-b-2 border-gray-200">
+    <!-- MENU NAVIGATION -->
+    <nav class="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between h-16">
-                <div class="flex space-x-4">
-                    <a href="/" class="flex items-center px-3 py-2 text-sm font-semibold text-blue-600">
+                <div class="flex space-x-1">
+                    <a href="{% url 'dashboard' %}" class="flex items-center px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 rounded transition">
                         📊 Dashboard
                     </a>
-                    <a href="/admin/core/symbol/" class="flex items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600">
+                    <a href="{% url 'symbol_list' %}" class="flex items-center px-4 py-2 text-sm text-white hover:bg-blue-800 rounded transition">
                         📈 Tickers
                     </a>
-                    <a href="/admin/core/scenario/" class="flex items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600">
+                    <a href="{% url 'scenario_list' %}" class="flex items-center px-4 py-2 text-sm text-white hover:bg-blue-800 rounded transition">
                         ⚙️ Scénarios
                     </a>
-                    <a href="/admin/backtesting/backtestrun/" class="flex items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600">
-                        🚀 Backtests
+                    <a href="{% url 'import_tickers' %}" class="flex items-center px-4 py-2 text-sm text-white hover:bg-blue-800 rounded transition">
+                        📥 Import CSV
                     </a>
-                    <a href="/admin/core/alert/" class="flex items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600">
-                        🔔 Alertes
-                    </a>
-                    <a href="/admin/" class="flex items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600">
-                        👨‍💼 Admin
+                    <a href="{% url 'logs' %}" class="flex items-center px-4 py-2 text-sm text-white hover:bg-blue-800 rounded transition">
+                        📋 Logs
                     </a>
                 </div>
-                <div class="flex items-center">
-                    <span class="text-xs text-gray-500">Finance Momet v2.0</span>
+                <div class="flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                    <span class="text-sm text-white">👤 {{ user.username }}</span>
+                    {% if user.is_superuser %}
+                    <a href="{% url 'admin:index' %}" class="text-xs text-white hover:text-blue-200 border border-white px-2 py-1 rounded">
+                        Admin
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'admin:logout' %}" class="text-sm text-white hover:text-red-200">Déconnexion</a>
+                    {% else %}
+                    <a href="{% url 'admin:login' %}" class="text-sm text-white hover:text-blue-200">Connexion</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </nav>
     
+    <!-- MESSAGES -->
     {% if messages %}
     <div class="max-w-7xl mx-auto px-4 mt-4">
         {% for message in messages %}
-        <div class="{% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-700{% else %}bg-green-100 border-green-400 text-green-700{% endif %} border px-4 py-3 rounded mb-2">
+        <div class="{% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-700{% else %}bg-green-100 border-green-400 text-green-700{% endif %} border px-4 py-3 rounded-lg shadow-sm mb-2">
             {{ message }}
         </div>
         {% endfor %}
     </div>
     {% endif %}
     
-    <main>
+    <!-- CONTENU -->
+    <main class="py-8">
         {% block content %}{% endblock %}
     </main>
     
-    <footer class="bg-white border-t mt-12 py-4">
-        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-gray-500">
-            Finance Momet © 2024
+    <!-- FOOTER -->
+    <footer class="bg-white border-t mt-12 py-6">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-sm text-gray-600">Finance Momet © 2024 - Application de backtesting boursier</p>
+            <p class="text-xs text-gray-400 mt-1">Powered by Django & Twelve Data API</p>
         </div>
     </footer>
 </body>
