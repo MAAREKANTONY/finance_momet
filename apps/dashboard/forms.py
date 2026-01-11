@@ -1,6 +1,3 @@
-sudo docker compose exec web bash
-cd /app
-cat > apps/dashboard/forms.py << 'EOFFORMS'
 from django import forms
 from apps.core.models import Symbol, Scenario
 from apps.market_data.services import TwelveDataService
@@ -109,5 +106,3 @@ class ScenarioForm(forms.ModelForm):
         if e == 0:
             raise forms.ValidationError("Le paramètre 'e' ne peut pas être 0")
         return e
-EOFFORMS
-exit
